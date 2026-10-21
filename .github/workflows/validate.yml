@@ -2,7 +2,6 @@ name: validate
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
@@ -24,12 +23,16 @@ jobs:
             if (!pkg.dsh || !pkg.dsh.bundle || !pkg.dsh.bundle.patch) {
               throw new Error('package.json 缺少 dsh.bundle.patch');
             }
-            const required = [pkg.dsh.bundle.patch, 'lib/index.js', 'README.md', 'LICENSE'];
+            const required = [pkg.dsh.bundle.patch, 'lib/index.js', 'lib/charts.js', 'README.md', 'LICENSE'];
             for (const file of required) {
               if (!fs.existsSync(file)) throw new Error('缺少文件: ' + file);
             }
             console.log('manifest ok');
           "
+
+      - name: Run chart renderer tests
+        shell: bash
+        run: node --test test/charts.test.mjs
 
       - name: Validate patch YAML
         shell: bash
@@ -45,5 +48,6 @@ jobs:
             const text = fs.readFileSync('cordis.patch.yml', 'utf8');
             if (!/id:\s*preset-researcher/.test(text)) throw new Error('缺少 preset-researcher 行');
             if (!/id:\s*researcher/.test(text)) throw new Error('缺少 researcher preset id');
+            if (!/tool-chart/.test(text)) throw new Error('缺少 tool-chart 行');
             console.log('preset ok');
           "

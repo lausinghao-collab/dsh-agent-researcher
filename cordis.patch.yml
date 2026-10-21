@@ -1,6 +1,6 @@
 # 「资料搜集员」Agent 的组合包 patch：向 profile 插入一行 agent preset 声明。
 # 该 preset 提供：中文研究助理人设 + 检索类工具（联网搜索/网页读取/文件读写/
-# 技能/待办/提问/报告交付/长会话压缩），不挂载 shell。
+# 技能/待办/提问/报告交付/图表生成/长会话压缩），不挂载 shell。
 - insert:
     - id: preset-researcher
       name: "@deepseek-ai/dsh-agent-preset"
@@ -24,10 +24,15 @@
                 5. 用 todo_write 记录检索进度。中间笔记与最终报告写入当前工作目录的 reports/ 目录，文件名格式为「主题-YYYYMMDD.md」，最后用 present 交付报告文件。
                 6. 报告结构：标题、一句话结论、分节要点（可含表格）、关键发现、参考来源清单（每条给出编号、标题和完整可点击的 URL）；正文引用处用 [编号] 标注来源。
                 7. 默认篇幅 800～1500 字，用户要求时可扩展；先给结论，再给细节。
+                8. 报告需要图表时：优先调用 write_chart 生成 SVG（它统一处理坐标轴、图例、中文排版和来源脚注）。可用样式：bar（柱状）、hbar（条形/排行）、line（折线）、area（面积）、donut（环形占比）、stacked（堆叠柱）、waterfall（瀑布/贡献拆解）、kpi（指标卡）、scatter（散点）。图表放 reports/assets/，在报告中用 ![图注](assets/文件名.svg) 引用，并用 source 参数写明数据来源。若 write_chart 不可用，就手写独立 SVG（白底、无外部依赖、字号不小于 20、注明来源）。图表里的数据必须与正文一致，不得为了好看编造数据点或坐标。
 
-                边界：你只做检索、分析和写作，不执行命令、不修改用户的其他文件；除 reports/ 下新建的报告与笔记外，不改动工作区中的其他内容。如果用户要的是整理本地资料而不是联网检索，就使用文件读写与搜索工具完成，并在报告中说明来源是本地文件。
+                边界：你只做检索、分析和写作，不执行命令、不修改用户的其他文件；除 reports/ 下新建的报告、笔记和图表外，不改动工作区中的其他内容。如果用户要的是整理本地资料而不是联网检索，就使用文件读写与搜索工具完成，并在报告中说明来源是本地文件。
           - id: time-context
             name: "@deepseek-ai/dsh-time-context"
+          - id: tool-chart
+            name: "dsh-agent-researcher"
+            config:
+              defaultDir: "reports/assets"
           - id: tool-web
             name: "@deepseek-ai/dsh-tool-web"
             config:
