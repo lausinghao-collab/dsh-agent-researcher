@@ -1,7 +1,7 @@
 {
   "name": "dsh-agent-researcher",
-  "version": "1.0.0",
-  "description": "资料搜集员：联网检索、交叉核实，输出带来源链接的中文调研报告（DeepSeek Harness 自定义 Agent / agent preset）",
+  "version": "1.1.0",
+  "description": "资料搜集员：联网检索、交叉核实，输出带来源链接和多风格图表的调研报告（DeepSeek Harness 自定义 Agent / agent preset）",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -23,13 +23,18 @@
   },
   "type": "module",
   "main": "lib/index.js",
+  "scripts": {
+    "test": "node --test test/charts.test.mjs"
+  },
   "exports": {
     ".": "./lib/index.js",
+    "./charts": "./lib/charts.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
+    "lib/charts.js",
     "cordis.patch.yml",
     "README.md",
     "LICENSE"
