@@ -1,0 +1,42 @@
+{
+  "name": "dsh-agent-researcher",
+  "version": "1.0.0",
+  "description": "资料搜集员：联网检索、交叉核实，输出带来源链接的中文调研报告（DeepSeek Harness 自定义 Agent / agent preset）",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "agent",
+    "agent-preset",
+    "cordis",
+    "research",
+    "中文"
+  ],
+  "license": "MIT",
+  "author": "lausinghao-collab",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lausinghao-collab/dsh-agent-researcher.git"
+  },
+  "homepage": "https://github.com/lausinghao-collab/dsh-agent-researcher#readme",
+  "bugs": {
+    "url": "https://github.com/lausinghao-collab/dsh-agent-researcher/issues"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

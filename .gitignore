@@ -1,0 +1,8 @@
+# 本地 / 构建产物
+node_modules/
+*.tgz
+*.bak-*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

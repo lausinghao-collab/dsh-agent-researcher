@@ -1,0 +1,70 @@
+# 「资料搜集员」Agent 的组合包 patch：向 profile 插入一行 agent preset 声明。
+# 该 preset 提供：中文研究助理人设 + 检索类工具（联网搜索/网页读取/文件读写/
+# 技能/待办/提问/报告交付/长会话压缩），不挂载 shell。
+- insert:
+    - id: preset-researcher
+      name: "@deepseek-ai/dsh-agent-preset"
+      config:
+        id: researcher
+        name: 资料搜集员
+        description: 联网检索、交叉核实，输出带来源链接的中文调研报告
+        order: 10
+        plugins:
+          - id: persona
+            name: "@deepseek-ai/dsh-persona"
+            config:
+              prefix: |-
+                你是「资料搜集员」，一名严谨的中文信息检索与研究助理。用户提出一个题目后，你负责检索、核实并整理信息，产出一份可直接使用的中文调研报告。
+
+                工作原则：
+                1. 先确认研究范围与交付标准。题目缺少关键信息（时间范围、地点、统计口径等）时，用 ask_user_question 一次问清最关键的一点，其余按合理默认值推进。
+                2. 用 web_search 从多个角度检索：换不同关键词，兼顾中文与英文来源，优先官方网站、一手资料、权威媒体与学术来源。
+                3. 用 web_fetch 打开关键页面读原文，不要只看搜索摘要。对关键事实至少交叉核对一次；来源互相矛盾或数据不确定时，在报告里如实说明。
+                4. 绝不编造来源、链接、数字或引文；无法核实时明确写「未找到可靠来源」。
+                5. 用 todo_write 记录检索进度。中间笔记与最终报告写入当前工作目录的 reports/ 目录，文件名格式为「主题-YYYYMMDD.md」，最后用 present 交付报告文件。
+                6. 报告结构：标题、一句话结论、分节要点（可含表格）、关键发现、参考来源清单（每条给出编号、标题和完整可点击的 URL）；正文引用处用 [编号] 标注来源。
+                7. 默认篇幅 800～1500 字，用户要求时可扩展；先给结论，再给细节。
+
+                边界：你只做检索、分析和写作，不执行命令、不修改用户的其他文件；除 reports/ 下新建的报告与笔记外，不改动工作区中的其他内容。如果用户要的是整理本地资料而不是联网检索，就使用文件读写与搜索工具完成，并在报告中说明来源是本地文件。
+          - id: time-context
+            name: "@deepseek-ai/dsh-time-context"
+          - id: tool-web
+            name: "@deepseek-ai/dsh-tool-web"
+            config:
+              fetch: true
+              searchTimeoutMs: 60000
+          - id: tool-fs
+            name: "@deepseek-ai/dsh-tool-fs"
+          - id: tool-fs-search
+            name: "@deepseek-ai/dsh-tool-fs-search"
+            config:
+              sampleOverCapGlobResults: false
+          - id: skill-filesystem
+            name: "@deepseek-ai/dsh-skill-filesystem"
+          - id: tool-skill
+            name: "@deepseek-ai/dsh-tool-skill"
+          - id: tool-todo
+            name: "@deepseek-ai/dsh-tool-todo"
+            config:
+              allowParallelInProgress: true
+          - id: tool-ask-user
+            name: "@deepseek-ai/dsh-tool-ask-user"
+          - id: present
+            name: "@deepseek-ai/dsh-tool-present"
+          - id: compaction
+            name: cordis:group
+            group: true
+            isolate:
+              compaction: true
+              toolResultPruner: true
+            config:
+              - id: compaction-basic
+                name: "@deepseek-ai/dsh-compaction-basic"
+              - id: command-compact
+                name: "@deepseek-ai/dsh-command-compact"
+              - id: tool-result-pruner
+                name: "@deepseek-ai/dsh-compaction-tool-result-pruner"
+                config:
+                  thresholdChars: 8192
+                  headChars: 4096
+                  tailChars: 1024
