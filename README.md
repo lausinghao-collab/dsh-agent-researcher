@@ -1,8 +1,8 @@
 # 资料搜集员 · dsh-agent-researcher
 
-> 一个装在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 里的**中文研究助理 Agent**：批量联网检索、来源台账与引用校验、本地文档抽取、多风格图表，输出可核实的带来源调研报告。
+> 一个装在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 里的**中文研究助理 Agent**：批量联网检索、来源台账与引用校验、本地文档抽取、多风格图表、报告模板与 CSV/HTML 导出，输出可核实的带来源调研报告。
 >
-> A custom DeepSeek Harness **agent preset** for Chinese web research: multi-query search, a citation ledger, local document extraction, multi-style charts, and a cited report.
+> A custom DeepSeek Harness **agent preset** for Chinese web research: multi-query search, a citation ledger, local document extraction, multi-style charts, report templates and CSV/HTML export.
 
 它是一个真正的 Agent 定义（agent preset），不是一段临时提示词：有自己的中文人设、工作流程和检索类工具集，装好后会出现在 Harness 的设置页和新任务选择器里，随用随选。
 
@@ -12,6 +12,8 @@
 - **批量检索**：`research_search` 一次并行 2–5 条互补查询，按 URL 去重、支持域名白名单/黑名单，返回紧凑来源清单（v1.2+）
 - **来源台账 + 引用校验**：`sources` 登记每条来源（URL/标题/备注/核实状态），`report_lint` 检查「正文 [编号] ↔ 来源台账 ↔ 参考来源清单」是否一致、图表路径是否存在（v1.2+）
 - **本地文档抽取**：`read_document` 直接读 docx / xlsx（按工作表输出表格）/ pptx / csv / tsv / txt / md / json，无需 shell（v1.2+）
+- **报告模板 + 导出**：`report_scaffold` 提供政策简报/竞品分析/文献综述/尽调/周报骨架；`write_table` 导出 CSV/TSV；`export_html` 导出**单文件 HTML**（图表内联、图片转 base64，可直接分享/打印）（v1.3+）
+- **引用格式**：`sources references` 支持编号制 / GB-T 7714 / APA（v1.3+）
 - **9 种图表样式**：内置 `write_chart` 工具，给数据就能生成柱状 / 条形 / 折线 / 面积 / 环形 / 堆叠 / 瀑布 / KPI 卡 / 散点 **SVG**，统一处理中文字体、坐标轴、图例、数值标注和来源脚注，不再手写 SVG（v1.1+）
 - **有纪律的工作流程**：多角度检索 → 打开原文核实 → 交叉核对 → 带 `[编号]` 引用与完整来源清单；绝不编造链接、数字和引文
 - **默认交付**：报告写入工作区 `reports/主题-YYYYMMDD.md`，并在对话里以文件卡片交付
@@ -91,6 +93,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File ".\install\install.ps1"
 
 > PDF 暂不支持直接解析（没有可用的纯 JS 解析器，也为了不默认引入 shell）。需要 PDF 时，把关键页转成 docx/txt 或提供文字。
 
+## 📄 模板与导出（v1.3+）
+
+| 工具 | 作用 |
+|---|---|
+| `report_scaffold` | 生成报告骨架：`policy_brief` 政策简报 / `competitive` 竞品分析 / `literature` 文献综述 / `due_diligence` 尽调 / `weekly` 周度跟踪 |
+| `write_table` | 把数据写成 CSV 或 TSV，供下载或后续处理 |
+| `export_html` | 把 Markdown 报告导出成**单文件 HTML**：标题/表格/列表/代码、内联 SVG 图表、base64 图片，一个文件打开即读，打印排版已适配 |
+| `sources references` | 生成参考文献：编号制 / GB-T 7714 / APA |
+
+一句示例：
+
+> 「用尽调模板写一份报告，参考文献用 GB/T 7714，最后导出 HTML 给我」
+
 ## 📊 图表样式（v1.1+）
 
 Agent 内置了 `write_chart` 工具，把结构化数据渲染成独立 SVG——不用你写代码，也不用模型手写 SVG：
@@ -144,7 +159,7 @@ Agent 内置了 `write_chart` 工具，把结构化数据渲染成独立 SVG—�
 
 ## 🔐 兼容性与安全边界
 
-- **测试版本**：DeepSeek Harness `0.2.1-rc.2`（2026-10），v1.2.0 的工具集在该版本上验证通过。版本差异较大时如果出现「加载失败的预设」卡片，属于预期——把 `cordis.patch.yml` 发给 Harness 里的 Agent 适配，或参照你的版本修改插件行
+- **测试版本**：DeepSeek Harness `0.2.1-rc.2`（2026-10），v1.3.0 的工具集在该版本上验证通过。版本差异较大时如果出现「加载失败的预设」卡片，属于预期——把 `cordis.patch.yml` 发给 Harness 里的 Agent 适配，或参照你的版本修改插件行
 - **工具只在组合包安装方式可用**：`write_chart`、`research_search`、`sources`、`report_lint`、`read_document` 由包内插件提供；手动安装方式（只追加 patch）没有这些工具，agent 会退化为手写 SVG + 普通读写
 - **不执行命令、不改代码**：preset 不挂载 shell 工具
 - **文件访问范围**：当前会话工作区（用于读写 `reports/` 下的报告）；不会主动碰其他目录
@@ -157,12 +172,15 @@ Agent 内置了 `write_chart` 工具，把结构化数据渲染成独立 SVG—�
 .
 ├── cordis.patch.yml        # 组合包 patch：声明「资料搜集员」agent preset（含工具插件行）
 ├── lib/
-│   ├── index.js            # 工具插件：write_chart / sources / report_lint / research_search / read_document
+│   ├── index.js            # 工具插件：write_chart / sources / report_lint / research_search / read_document / write_table / report_scaffold / export_html
 │   ├── charts.js           # 纯函数 SVG 渲染器（9 种图表样式，无第三方依赖）
-│   ├── sources.js          # 来源台账与引用校验（纯函数）
+│   ├── sources.js          # 来源台账、引用校验与参考文献格式（纯函数）
 │   ├── search.js           # 批量检索结果合并/去重/域名过滤（纯函数）
 │   ├── documents.js        # docx / xlsx / pptx / csv 文本抽取
-│   └── zip.js              # 最小 ZIP 读取器（无第三方依赖）
+│   ├── zip.js              # 最小 ZIP 读取器（无第三方依赖）
+│   ├── table.js            # CSV/TSV 导出
+│   ├── templates.js        # 报告模板
+│   └── html.js             # Markdown → 单文件 HTML
 ├── package.json            # 组合包清单（dsh.bundle.patch 指向上面）
 ├── test/                   # 单元测试（node --test）+ 文档夹具
 ├── install/
@@ -188,6 +206,7 @@ Agent 内置了 `write_chart` 工具，把结构化数据渲染成独立 SVG—�
 
 ## 🧾 更新日志
 
+- **v1.3.0**（2026-10）：新增 `report_scaffold`（5 种报告模板）、`write_table`（CSV/TSV 导出）、`export_html`（单文件 HTML，内联图表/图片）、`sources references`（编号制/GB-T 7714/APA）；`report_lint` 增加图表「数据来源」脚注检查；29 项单元测试。
 - **v1.2.0**（2026-10）：新增 `research_search`（批量检索）、`sources`（来源台账）、`report_lint`（引用校验）、`read_document`（本地 docx/xlsx/pptx/csv 读取）；人设加入「检索→登记→引用→校验」工作流；新增 22 项单元测试与文档夹具。
 - **v1.1.0**（2026-10）：新增 `write_chart` 图表工具——9 种样式、浅色/深色主题、自定义配色、单位与来源脚注；人设加入图表使用规范；新增单元测试与 CI 校验。
 - **v1.0.0**（2026-10）：首个版本。agent preset + 三种安装方式（Git / 本地目录 / 手动）+ 通用系统提示词。
