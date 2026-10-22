@@ -1,7 +1,7 @@
 {
   "name": "dsh-agent-researcher",
-  "version": "1.2.0",
-  "description": "资料搜集员：批量联网检索、来源台账与引用校验、本地文档抽取、多风格图表，输出带来源的中文调研报告（DeepSeek Harness 自定义 Agent / agent preset）",
+  "version": "1.3.0",
+  "description": "资料搜集员：批量检索、来源台账与引用校验、本地文档抽取、报告模板、CSV/HTML 导出、多风格图表，输出可核实的中文调研报告（DeepSeek Harness 自定义 Agent）",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -24,7 +24,7 @@
   "type": "module",
   "main": "lib/index.js",
   "scripts": {
-    "test": "node --test test/charts.test.mjs test/sources.test.mjs test/search.test.mjs test/documents.test.mjs"
+    "test": "node --test test/charts.test.mjs test/sources.test.mjs test/search.test.mjs test/documents.test.mjs test/export.test.mjs"
   },
   "exports": {
     ".": "./lib/index.js",
@@ -32,6 +32,9 @@
     "./sources": "./lib/sources.js",
     "./search": "./lib/search.js",
     "./documents": "./lib/documents.js",
+    "./table": "./lib/table.js",
+    "./templates": "./lib/templates.js",
+    "./html": "./lib/html.js",
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
   },
